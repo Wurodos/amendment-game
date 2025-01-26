@@ -33,8 +33,13 @@ function Tutorial:init()
     is_map = true
     tw_delay = 0.04
     
-    expedition_force = Team({Slave()})
-    ambush_force = Team({Slave(), Slave()})
+    expedition_force = Team({})
+    expedition_force:add(Slave(ITEM_POOL.MagnetAccelerator:clone()))
+    expedition_force:add(Slave(ITEM_POOL.MagnetAccelerator:clone()))
+
+    ambush_force = Team({})
+    ambush_force:add(Slave(nil, nil, nil, -1))
+    ambush_force:add(Slave(nil, nil, nil, -1))
 
     Map:init({is_tutorial = true})
     Map:blockMovement()
@@ -62,16 +67,22 @@ function Tutorial:keypressed(key)
             if dialogue_id < 6 then return
             elseif dialogue_id == 6 or dialogue_id == 9 then advance_dialogue()
             elseif dialogue_id == 7 or dialogue_id == 8 then return end
+            Battle:keypressed(key)
+        elseif dialogue_id > 11 then
+            if dialogue_id == 12 and (key == "u" or key == "h") then advance_dialogue() end
+            if dialogue_id == 13 and key == "s" then advance_dialogue() end
+            if dialogue_id == 14 and (key == "space") then advance_dialogue() end
+            Battle:keypressed(key)
         end
-        Battle:keypressed(key)
     end
 end
 
 function Tutorial:mousereleased()
     if tw.hasFinished() then
-        if dialogue_id ~= 6 and dialogue_id ~= 9 then
+        if dialogue_id ~= 6 and dialogue_id ~= 9 and dialogue_id ~= 12
+        and dialogue_id ~= 13 and dialogue_id ~= 14 then
             advance_dialogue() end
-    else
+        else
         -- skip
         tw.fastforward()
     end
@@ -82,8 +93,11 @@ function Tutorial:draw()
     if is_map then Map:draw() end
     if is_battle then Battle:draw() end
 
+    love.graphics.setColor(0.3,0.3,0.3)
+    love.graphics.rectangle("fill", 0, 450, WINDOW_WIDTH, 130)
+    love.graphics.setColor(1,1,1)
     text.setFont("big")
-    tw.draw(50, WINDOW_HEIGHT - 200, WINDOW_WIDTH - 100, "left")
+    tw.draw(50, WINDOW_HEIGHT - 150, WINDOW_WIDTH - 100, "left")
 end
 
 

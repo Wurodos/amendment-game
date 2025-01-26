@@ -1,15 +1,21 @@
 local Gamestate = require "hump.gamestate"
 local Menu = require "boot.menu"
+local Splash = require "torture.bits.splash"
 require "gooi"
 
 
+
+
 function love.load()
-    TT = require "text.text"
+    local TT = require "text.text"
+
     STYLE = {}
     
     WINDOW_HEIGHT = love.graphics.getHeight()
     WINDOW_WIDTH = love.graphics.getWidth()
+    
     TT.init()
+    Splash.init()
 
     Gamestate.registerEvents()
     Gamestate.switch(Menu)
