@@ -15,7 +15,7 @@ function Entity:move(thing, to, speed, f)
     local v1, v2 = Vector.new(thing.x, thing.y), Vector.new(to.x, to.y)
     all_animation[#all_animation+1] = {thing=thing,to=to,speed=speed,
     dir=(v2 - v1):normalized()}
-    Signal.register("animation_over", f)
+    Signal.register("entity_over", f)
     print((v2 - v1):normalized():unpack())
 end
 
@@ -25,8 +25,8 @@ function Entity:update(dt)
         anim.thing.y = anim.thing.y + anim.speed*anim.dir.y*dt
 
         if math.abs(anim.thing.x + anim.thing.y - anim.to.x - anim.to.y) < 5 then
-            Signal.emit("animation_over")
-            Signal.remove("animation_over")
+            Signal.emit("entity_over")
+            Signal.remove("entity_over")
             table.remove(all_animation, _)
         end
     end

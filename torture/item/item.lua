@@ -1,4 +1,6 @@
 local Class = require "hump.class"
+local Signal = require "hump.signal"
+local Splash = require "torture.bits.splash"
 local json = require "text.json"
 
 local offsets = {
@@ -37,7 +39,10 @@ function Item.initPool()
         Fist = Item(-1, 'w', 'Fist', function (sender, victim) print("low dmg") end),
         ClearHead = Item(-1, 'h', 'ClearHead', function (sender, victim) print("protect self") end),
         EmptyHand = Item(-1, 't', 'EmptyHand', function (sender, victim) print("restore morale") end),
-        MagnetAccelerator = Item(1, 'w', 'MagnetAccelerator', function (sender, victim) print("shoot") end),
+        MagnetAccelerator = Item(1, 'w', 'MagnetAccelerator', function (sender, victim)
+            print("magnet acceleration!!!!")
+            victim:animShoot(function () Item.severeDMG(sender, victim) end)
+        end),
         Cap = Item(2, 'h', 'Cap', function (sender, victim) print("cap order") end),
         Receiver = Item(3, 't', 'Receiver', function (sender, victim) print("receiver order") end),
     }
@@ -54,5 +59,8 @@ function Item:draw(slave_x, slave_y, slave_s)
     if self.img then love.graphics.draw(self.img, self.pos.x*s + slave_x , self.pos.y*s + slave_y, 0, s*resize) end
 end
 
+function Item.severeDMG(sender, victim)
+    victim:addTrauma(TRAUMA_POOL.swisscheese:clone())
+end
 
 return Item

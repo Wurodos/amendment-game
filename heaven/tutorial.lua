@@ -10,6 +10,7 @@ local tw = require "text.typewriter"
 local Battle = require "torture.battle"
 local Team = require "torture.slave.team"
 local Slave = require "torture.slave.slave"
+local Enemy = require "torture.enemy.enemy"
 
 local is_map = false
 local is_battle = false
@@ -38,8 +39,8 @@ function Tutorial:init()
     expedition_force:add(Slave(ITEM_POOL.MagnetAccelerator:clone()))
 
     ambush_force = Team({})
-    ambush_force:add(Slave(nil, nil, nil, -1))
-    ambush_force:add(Slave(nil, nil, nil, -1))
+    ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
+    ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
 
     Map:init({is_tutorial = true})
     Map:blockMovement()
@@ -69,9 +70,10 @@ function Tutorial:keypressed(key)
             elseif dialogue_id == 7 or dialogue_id == 8 then return end
             Battle:keypressed(key)
         elseif dialogue_id > 11 then
-            if dialogue_id == 12 and (key == "u" or key == "h") then advance_dialogue() end
-            if dialogue_id == 13 and key == "s" then advance_dialogue() end
-            if dialogue_id == 14 and (key == "space") then advance_dialogue() end
+            if dialogue_id == 12 and (key == "u" or key == "h") then advance_dialogue()
+            elseif dialogue_id == 13 and key == "s" then advance_dialogue()
+            elseif dialogue_id == 14 and (key == "space") then advance_dialogue()
+            elseif dialogue_id > 15 and dialogue_id < 21 then return end
             Battle:keypressed(key)
         end
     end
@@ -80,7 +82,7 @@ end
 function Tutorial:mousereleased()
     if tw.hasFinished() then
         if dialogue_id ~= 6 and dialogue_id ~= 9 and dialogue_id ~= 12
-        and dialogue_id ~= 13 and dialogue_id ~= 14 then
+        and dialogue_id ~= 13 and dialogue_id ~= 14 and dialogue_id ~= 21 then
             advance_dialogue() end
         else
         -- skip

@@ -1,6 +1,30 @@
+local Signal = require "hump.signal"
+local Class = require "hump.class"
+
 local Splash = {}
 
-local Signal = require "hump.signal"
+Splash.Animator = Class{
+    init = function (self, animation, doAfter)
+        self.current_frame = 1
+        self.delta = 0
+        self.spf = 1/animation.fps
+        self.doAfter = doAfter
+        self.frames = animation.frames
+    end,
+    update = function (self, dt)
+        self.delta = self.delta + dt
+        if self.delta > self.spf then
+            self.delta = 0
+            self.current_frame = self.current_frame + 1
+            if self.current_frame > #self.frames then
+                self.doAfter()
+            end
+        end
+    end,
+    draw = function (self, x, y)
+        love.graphics.draw(self.frames[self.current_frame], x, y)
+    end
+}
 
 local ellipse_width = 50
 
@@ -31,6 +55,10 @@ local spf = 0.15
 
 local delta = 0
 
+function Splash.new()
+    return setmetatable({}, Splash)
+end
+
 function Splash.init()
     current_frame = 1
     is_animating = false
@@ -38,12 +66,16 @@ function Splash.init()
         cut = {
             frames = loadFrames("cut", 4),
             fps = 5
+        },
+        shoot = {
+            frames = loadFrames("shoot", 4),
+            fps = 10
         }
     }
 end
 
-function Splash.addAnimation(animation)
-    animation_queue[#animation_queue+1] = animation
+function Splash.addAnimation(animation, doAfter)
+    animation_queue[#animation_queue+1] = {anim = animation, doAfter = doAfter}
     is_animating = true
 end
 
@@ -53,12 +85,18 @@ function Splash.update(dt)
         delta = 0
         if not is_animating then return end
         current_frame = current_frame + 1
-        if #animation_queue[1].frames < current_frame then
+        if #animation_queue[1].anim.frames < current_frame then
+            animation_queue[1].doAfter()
             table.remove(animation_queue, 1)
             current_frame = 1
             if #animation_queue == 0 then
                 is_animating = false
-                Signal.emit("animation_over")
+                print("all animation is over")
+                --Signal.emit("animation_over")
+                --Signal.emit("animation_over_deferred")
+                --
+                --Signal.clear("animation_over")
+                --Signal.clear("animation_over_deferred")
             end
         end
     end
@@ -67,7 +105,7 @@ end
 
 function Splash.draw(x, y)
     if is_animating then
-        love.graphics.draw(animation_queue[1].frames[current_frame], x, y) 
+        love.graphics.draw(animation_queue[1].anim.frames[current_frame], x, y) 
     end
 end
 

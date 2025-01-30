@@ -1,5 +1,7 @@
 local Battle = {}
 
+local Signal = require "hump.signal"
+
 local Text = require "text.text"
 local Splash = require "torture.bits.splash"
 
@@ -16,6 +18,7 @@ local team_offset_y = 60
 local orders = {}
 local current_order = {}
 
+local waiting_for_dudes = 0
 local is_manual_open = false
 local is_ordering = false
 local is_targeting = false
@@ -30,13 +33,20 @@ local pos_order = {
 local resize_order = 0.7
 
 local text_targeting = "placeholder"
+local text_enemy_turn = "xoxo"
 
 function Battle:init(good, bad)
+
+    -- Signal.register("animation_over_deferred", Battle.enemyTurn)
+
     bg_image = love.graphics.newImage("torture/bg.png")
     img_manual = love.graphics.newImage("torture/manual_"..LANG..".png")
     img_order = love.graphics.newImage("torture/bits/img_order.png")
 
     text_targeting = Text.get "TARGETING"
+    text_enemy_turn = Text.get "ENEMY_TURN"
+
+    waiting_for_dudes = 0
 
     good_team = good
     bad_team = bad
@@ -47,6 +57,13 @@ end
 
 
 function Battle:update(dt)
+    for _, slave in ipairs(good_team.boys) do
+        slave:update(dt)
+    end
+    for _, slave in ipairs(bad_team.boys) do
+        slave:update(dt)
+    end
+    Splash.update(dt)
 end
 
 
@@ -99,6 +116,10 @@ function Battle:draw()
         Text.draw(text_targeting..current_order.item.name, 0, 100)
     end
 
+    if is_enemy then
+        Text.draw(text_enemy_turn, 0, 100)
+    end
+
    
 
 end
@@ -149,13 +170,13 @@ end
 function Battle.confirmOrder()
     for _, slave in ipairs(good_team.boys) do
         if slave.pending_order then
+            waiting_for_dudes = waiting_for_dudes + 1
             slave.pending_order.item.order(slave.pending_order.sender, slave.pending_order.victim)
             slave.pending_order = nil
         end
     end
-
     is_ready = false
-    Battle.enemyTurn()
+
 end
 
 -- 2 left
@@ -167,7 +188,28 @@ function Battle.switchOrder(to)
 end
 
 function Battle.enemyTurn()
+    print("enemy turn")
+    bad_team:upkeep()
     is_enemy = true
+    waiting_for_dudes = #bad_team.boys
+    for _, bad in ipairs(bad_team.boys) do
+        bad:onStartTurn(bad_team, good_team)
+    end
+end
+
+function Battle.dudeDone()
+    waiting_for_dudes = waiting_for_dudes - 1
+    print("dude done. "..waiting_for_dudes.." left")
+    if waiting_for_dudes == 0 then
+        print("not waiting for dudes")
+        if is_enemy then
+            good_team:upkeep()
+            is_enemy = false
+        else
+            Battle.enemyTurn()
+        end
+        
+    end
 end
 
 return Battle

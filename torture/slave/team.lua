@@ -38,5 +38,22 @@ function Team:draw(x, y)
     Text.draw(morale_label, x-120, 15, {align="left"})
 end
 
+function Team:upkeep()
+    for _, slave in ipairs(self.boys) do
+        for _, trauma in ipairs(slave.emotional) do
+            if trauma.morale_tick then
+                print("morale tick "..trauma.morale_tick)
+                self:changeMorale(-trauma.morale_tick)
+            end
+        end
+    end
+end
+
+function Team:changeMorale(delta)
+    -- TODO animation
+    self.morale = self.morale + delta
+    self.ratio = self.morale / self.maxmorale
+end
+
 
 return Team

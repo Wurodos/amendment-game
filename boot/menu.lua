@@ -2,6 +2,8 @@
 local Gamestate = require "hump.gamestate"
 local Test = require "heaven.intro"
 local Item = require "torture.item.item"
+local Trauma = require "torture.pain.trauma"
+local Enemy = require "torture.enemy.enemy"
 local text = require "text.text"
 
 
@@ -28,6 +30,7 @@ function Menu:init()
         LANG = "ru"
         text.getFile("ru")
         Item.initPool()
+        Trauma.initPool()
         Gamestate.switch(Test)
     end)
     local btn_play_en = gooi.newButton({text = "English"}):bg(component.colors.green)
@@ -35,6 +38,7 @@ function Menu:init()
         LANG = "en"
         text.getFile("en")
         Item.initPool()
+        Trauma.initPool()
         Gamestate.switch(Test)
     end)
 
