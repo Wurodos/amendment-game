@@ -1,9 +1,9 @@
 local Battle = {}
 
-local Signal = require "hump.signal"
-
 local Text = require "text.text"
 local Splash = require "torture.bits.splash"
+
+local Item = require "torture.item.item"
 
 local bg_image
 local img_manual
@@ -11,6 +11,9 @@ local img_order
 
 local good_team = {}
 local bad_team = {}
+
+local rewards = {}
+
 local team_offset_x = 150
 local team_offset_y = 60
 local victory_padding = 50
@@ -20,6 +23,7 @@ local orders = {}
 local current_order = {}
 
 local waiting_for_dudes = 0
+local is_tutorial = false
 local is_manual_open = false
 local is_ordering = false
 local is_targeting = false
@@ -37,9 +41,11 @@ local resize_order = 0.7
 local text_targeting = "placeholder"
 local text_enemy_turn = "xoxo"
 local text_your_turn = "oxox"
+local text_victory = "llll"
+
 local doAfterWin
 
-function Battle:init(good, bad, afterWin)
+function Battle:init(good, bad, afterWin, param)
 
     -- Signal.register("animation_over_deferred", Battle.enemyTurn)
 
@@ -50,6 +56,7 @@ function Battle:init(good, bad, afterWin)
     text_targeting = Text.get "TARGETING"
     text_enemy_turn = Text.get "ENEMY_TURN"
     text_your_turn = Text.get "YOUR_TURN"
+    text_victory = Text.get "VICTORY"
 
     waiting_for_dudes = 0
 
@@ -62,6 +69,12 @@ function Battle:init(good, bad, afterWin)
     is_ready = false
     is_enemy = false
     is_won = false
+
+    if param == nil then return end
+    
+    if param.is_tutorial then is_tutorial = true
+    else is_tutorial = false end
+    
 end
 
 
@@ -86,9 +99,13 @@ function Battle:draw()
         for _, slave in ipairs(good_team.boys) do
             local order = slave.pending_order
             if order and order.victim then
-                Splash.connectSlaves(
-                order.sender.x + team_offset_x + 64, order.sender.y + team_offset_y + 128,
-                order.victim.x + WINDOW_WIDTH - team_offset_x - 64, order.victim.y + team_offset_y + 128)
+                if order.victim.boys then
+                    Splash.teamTarget(order.sender.x + team_offset_x + 64, order.sender.y + team_offset_y + 128)
+                elseif order.sender ~= order.victim then
+                    Splash.connectSlaves(
+                    order.sender.x + team_offset_x + 64, order.sender.y + team_offset_y + 128,
+                    order.victim.x + WINDOW_WIDTH - team_offset_x - 64, order.victim.y + team_offset_y + 128)
+                else Splash.chooseSelf(order.sender.x + team_offset_x + 64, order.sender.y + team_offset_y + 128) end
             end
         end
         
@@ -139,10 +156,19 @@ function Battle:draw()
 
     -- Victory screen
     if is_won then
-        love.graphics.setColor(0.5,0.5,0.5,0.5)
+        love.graphics.setColor(0.7,0.7,0.7,0.5)
         love.graphics.rectangle("fill", victory_padding, victory_padding,
             WINDOW_WIDTH - 2*victory_padding, WINDOW_HEIGHT - 2*victory_padding)
         love.graphics.setColor(1,1,1,1)
+
+        Text.draw(text_victory, 0, victory_padding*2)
+
+        -- TODO Rewards
+
+        for i, item in ipairs(rewards) do
+            item:drawInBox(100*i, 500)
+        end
+
     end
 
 end
@@ -184,6 +210,13 @@ function Battle.chooseTarget()
     current_order.sender.pending_order = current_order
     is_ordering = false
     is_targeting = true
+    if current_order.item.target == Item.SINGLE then
+        return
+    elseif current_order.item.target == Item.TARGET.SELF then
+        Battle.executeOrder(current_order.sender)
+    elseif current_order.item.target == Item.TARGET.OWNTEAM then
+        Battle.executeOrder(good_team)
+    end
 end
 
 function Battle.executeOrder(victim)
@@ -241,7 +274,22 @@ function Battle.dudeDone()
 end
 
 function Battle.playerWin()
+    if is_won then return end
+    
     is_won = true
+
+
+    if Battle.is_tutorial then rewards = {ITEM_POOL.Fang:clone()}
+        return
+    end
+
+
+    for _, enemy in ipairs(bad_team.boys) do
+        for _, item in ipairs(enemy:drop()) do
+            print(item.name)
+            rewards[#rewards+1] = item
+        end
+    end
 end
 
 return Battle

@@ -64,7 +64,7 @@ function Tutorial:init()
     Signal.register("battle", function ()
         is_battle = true
         is_map = false
-        Battle:init(expedition_force, ambush_force, Tutorial.proceed)
+        Battle:init(expedition_force, ambush_force, Tutorial.proceed, {is_tutorial = true})
         advance_dialogue()
     end)
 
@@ -129,7 +129,7 @@ end
 
 function Tutorial.proceed()
     print("GO!")
-    Gamestate.switch(Firstrun)
+    Gamestate.switch(Firstrun, expedition_force)
 end
 
 

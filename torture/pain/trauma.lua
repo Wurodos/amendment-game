@@ -50,7 +50,10 @@ function Trauma:draw(x, y)
     self.y = y
     love.graphics.draw(self.img, x, y)
     if self.is_under_mouse then
+        Text.setFont "readable"
         Text.draw(self.name, x - self.size, y + self.size, {limit=3*self.size})
+        Text.draw(self.desc, x - self.size, y + self.size*1.5, {limit=3*self.size})
+        Text.setFont "big"
     end
 end
 

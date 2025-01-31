@@ -36,14 +36,14 @@ function Slave:draw(x, y)
     for i, trauma in ipairs(self.emotional) do
         trauma:draw(self.x+x+52*(i-1)*self.resize, self.y+y)
     end
-    for _, animator in ipairs(self.all_animators) do
-        animator:draw(self.x+x+self.offset, self.y+y)
+    if self.all_animators[1] then
+        self.all_animators[1]:draw(self.x+x+self.offset, self.y+y)
     end
 end
 
 function Slave:update(dt)
-    for _, animator in ipairs(self.all_animators) do
-        animator:update(dt)
+    if self.all_animators[1] then
+        self.all_animators[1]:update(dt)
     end
     for _, trauma in ipairs(self.emotional) do
         trauma:update(dt)
@@ -87,6 +87,24 @@ end
 function Slave:animShoot(do_after)
     self.all_animators[#self.all_animators+1] =
     Splash.Animator(ANIMATION_POOL.shoot, function ()
+        do_after()
+        table.remove(self.all_animators, 1)
+        Battle.dudeDone()
+    end)
+end
+
+function Slave:animShield(do_after)
+    self.all_animators[#self.all_animators+1] =
+    Splash.Animator(ANIMATION_POOL.shield, function ()
+        do_after()
+        table.remove(self.all_animators, 1)
+        Battle.dudeDone()
+    end)
+end
+
+function Slave:animSun(do_after)
+    self.all_animators[#self.all_animators+1] =
+    Splash.Animator(ANIMATION_POOL.sun, function ()
         do_after()
         table.remove(self.all_animators, 1)
         Battle.dudeDone()

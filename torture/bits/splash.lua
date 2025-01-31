@@ -46,6 +46,19 @@ function Splash.connectSlaves(x1, y1, x2, y2)
     love.graphics.setColor(1,1,1)
 end
 
+function Splash.chooseSelf(x1, y1)
+    love.graphics.setColor(0.2,0.2,0.7)
+    love.graphics.setLineWidth(10)
+    love.graphics.ellipse("line", x1, y1, ellipse_width*1.5, 30)
+    love.graphics.setColor(1,1,1)
+end
+
+function Splash.teamTarget(x1,y1)
+    love.graphics.setColor(0.2,0.7,0.2)
+    love.graphics.setLineWidth(10)
+    love.graphics.ellipse("line", x1, y1, ellipse_width*1.5, 30)
+    love.graphics.setColor(1,1,1)
+end
 
 
 local animation_queue = {}
@@ -69,6 +82,14 @@ function Splash.init()
         },
         shoot = {
             frames = loadFrames("shoot", 4),
+            fps = 10
+        },
+        shield = {
+            frames = loadFrames("shield", 4),
+            fps = 5
+        },
+        sun = {
+            frames = loadFrames("sun", 4),
             fps = 10
         }
     }

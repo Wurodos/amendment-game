@@ -13,6 +13,14 @@ Enemy.Chomper = Class{ __includes = Slave,
         Slave.init(self, weapon, hat, trinket, resize)
         self.img = love.graphics.newImage("torture/enemy/chomper.png")
     end,
+    drop = function (self)
+        -- 50% chance for Fang
+        local r = math.random(0, 99)
+        print(r)
+        if r < 50 then
+            return {ITEM_POOL.Fang:clone()}
+        else return {} end
+    end
 }
 
 function Enemy.Chomper:onStartTurn(own_team, enemy_team)

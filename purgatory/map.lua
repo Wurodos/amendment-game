@@ -49,6 +49,9 @@ function Map:init(param)
     party.is_moving = false
 end
 
+function Map:returnToMap()
+end
+
 function Map:update(dt)
     if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
         camera_y = camera_y + dt*camera_speed end
