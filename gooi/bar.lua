@@ -96,5 +96,6 @@ function gooi.newBar(params)
     self.w = l
     return self
   end
+---@diagnostic disable-next-line: undefined-global
   return gooi.storeComponent(p, id)
 end

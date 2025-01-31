@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, need-check-nil, undefined-field, lowercase-global
 gooi = {}
 gooi.__index = gooi
 gooi.components = {}

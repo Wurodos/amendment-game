@@ -1,7 +1,11 @@
 local Class = require "hump.class"
+local Gamestate = require "hump.gamestate"
 
+local Battle = require "torture.battle"
 local Slave = require "torture.slave.slave"
 local Text = require "text.text"
+
+local Void = require "limbo.void"
 
 local slave_offset = 120
 local morale_length = 220
@@ -10,11 +14,12 @@ local morale_label = nil
 local health_color = {0.36, 0.72, 0.36, 1.0}
 
 local Team = Class{
-    init = function (self, boys)
+    init = function (self, boys, maxmorale, is_player_team)
         self.boys = boys
-        self.maxmorale = 100
-        self.morale = 100
+        self.maxmorale = maxmorale or 100
+        self.morale = self.maxmorale
         self.ratio = self.morale / self.maxmorale
+        self.is_player_team = is_player_team or false
         if morale_label == nil then morale_label = Text.get "MORALE" end
     end,
 }
@@ -53,6 +58,15 @@ function Team:changeMorale(delta)
     -- TODO animation
     self.morale = self.morale + delta
     self.ratio = self.morale / self.maxmorale
+
+    if self.morale <= 0 then
+        self.ratio = 0
+        if self.is_player_team then
+            Gamestate.switch(Void)
+        else
+            Battle.playerWin()
+        end
+    end
 end
 
 

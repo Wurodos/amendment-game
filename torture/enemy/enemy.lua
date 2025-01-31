@@ -19,7 +19,7 @@ function Enemy.Chomper:onStartTurn(own_team, enemy_team)
     -- Bites random dude
     local target = Chaos.pickRandom(enemy_team.boys)
     target:animCut(function ()
-        target:addTrauma(TRAUMA_POOL.bitten)
+        target:addTrauma(TRAUMA_POOL.bitten:clone())
     end)
 end
 

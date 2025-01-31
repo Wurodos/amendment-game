@@ -1,6 +1,8 @@
 local Gamestate = require "hump.gamestate"
 local Menu = require "boot.menu"
 local Splash = require "torture.bits.splash"
+local Saving = require "limbo.save"
+
 local math = require "math"
 require "gooi"
 
@@ -18,6 +20,7 @@ function love.load()
     
     TT.init()
     Splash.init()
+    Saving.load()
 
     Gamestate.registerEvents()
     Gamestate.switch(Menu)

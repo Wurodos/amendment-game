@@ -35,6 +35,7 @@ function gooi.newSpinner(params)
   end
   function s:rebuild()
     -- Coords for minus and plus buttons:
+---@diagnostic disable-next-line: undefined-global
     self.step = step or 1
     self.xMin = self.x + self.h / 2
     self.yMin = self.y + self.h / 2

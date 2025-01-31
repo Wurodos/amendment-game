@@ -13,6 +13,7 @@ local good_team = {}
 local bad_team = {}
 local team_offset_x = 150
 local team_offset_y = 60
+local victory_padding = 50
 
 -- Fields: item, sender
 local orders = {}
@@ -24,6 +25,7 @@ local is_ordering = false
 local is_targeting = false
 local is_ready = false
 local is_enemy = false
+local is_won = false
 
 local pos_order = {
     {x = 250, y = 100},
@@ -34,8 +36,10 @@ local resize_order = 0.7
 
 local text_targeting = "placeholder"
 local text_enemy_turn = "xoxo"
+local text_your_turn = "oxox"
+local doAfterWin
 
-function Battle:init(good, bad)
+function Battle:init(good, bad, afterWin)
 
     -- Signal.register("animation_over_deferred", Battle.enemyTurn)
 
@@ -45,14 +49,19 @@ function Battle:init(good, bad)
 
     text_targeting = Text.get "TARGETING"
     text_enemy_turn = Text.get "ENEMY_TURN"
+    text_your_turn = Text.get "YOUR_TURN"
 
     waiting_for_dudes = 0
 
     good_team = good
     bad_team = bad
+    doAfterWin = afterWin
+    
     is_ordering = false
     is_targeting = false
     is_ready = false
+    is_enemy = false
+    is_won = false
 end
 
 
@@ -90,16 +99,27 @@ function Battle:draw()
     -- Bad team
     bad_team:draw(WINDOW_WIDTH - team_offset_x, team_offset_y)
 
+
+    -- Turn reminder
+    if not is_won then
+        if is_enemy then
+            Text.draw(text_enemy_turn, 0, 50)
+        else
+            Text.draw(text_your_turn, 0, 50)
+        end
+    end
+
     -- Manual
     if is_manual_open then love.graphics.draw(img_manual) end
 
+    -- Orders 
     if is_ordering then
         -- Veil
         love.graphics.setColor(0,0,0,0.5)
         love.graphics.rectangle("fill",0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
         love.graphics.setColor(1,1,1,1)
 
-        -- Orders
+        -- Order blocks
         
         for i, order in ipairs(orders) do
             if i > 1 then love.graphics.setColor(0.6, 0.6, 0.6) end
@@ -116,18 +136,24 @@ function Battle:draw()
         Text.draw(text_targeting..current_order.item.name, 0, 100)
     end
 
-    if is_enemy then
-        Text.draw(text_enemy_turn, 0, 100)
-    end
 
-   
+    -- Victory screen
+    if is_won then
+        love.graphics.setColor(0.5,0.5,0.5,0.5)
+        love.graphics.rectangle("fill", victory_padding, victory_padding,
+            WINDOW_WIDTH - 2*victory_padding, WINDOW_HEIGHT - 2*victory_padding)
+        love.graphics.setColor(1,1,1,1)
+    end
 
 end
 
 
 function Battle:keypressed(key)
     if is_enemy then return end
-
+    if is_won then
+        if key == "return" then doAfterWin() end
+        return
+    end
     if key == "q" then is_manual_open = not is_manual_open
     elseif key == "u" and not is_ordering then Battle.startOrder(good_team.boys[1])
     elseif key == "h" and not is_ordering then Battle.startOrder(good_team.boys[2])
@@ -190,6 +216,8 @@ end
 function Battle.enemyTurn()
     print("enemy turn")
     bad_team:upkeep()
+    if bad_team.morale <= 0 then return end
+    
     is_enemy = true
     waiting_for_dudes = #bad_team.boys
     for _, bad in ipairs(bad_team.boys) do
@@ -210,6 +238,10 @@ function Battle.dudeDone()
         end
         
     end
+end
+
+function Battle.playerWin()
+    is_won = true
 end
 
 return Battle

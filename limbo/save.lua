@@ -1,18 +1,26 @@
 local json = require "text.json"
-local saving = {}
+local Saving = {}
 
 local save = {}
 
-function saving.load()
-    local file
-    file = io.open("limbo/save.json", "r")
-    if not file then error("no text file") end
+function Saving.load()
+    local file = io.open("limbo/save.json", "r")
+    if not file then error("no save file") end
     local raw_json = file:read "*a"
     save = json.decode(raw_json)
 end
 
-function saving.getSave()
+function Saving.getSave()
     return save
 end
 
-return saving
+function Saving.overwriteSave(new_save)
+    save = new_save
+    local raw_json = json.encode(save)
+
+    local file = io.open("limbo/save.json", "w")
+    if not file then error("no save file") end
+    file:write(raw_json)
+end
+
+return Saving

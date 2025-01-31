@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global
 --[[
 Copyright (c) 2010-2013 Matthias Richter
 

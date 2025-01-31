@@ -20,6 +20,7 @@ local Slave = Class{
         self.trinket = trinket or ITEM_POOL.EmptyHand:clone()
 
         self.emotional = {}
+        self.all_animators = {}
         self.pending_order = nil
 
         if img_path then self.img = love.graphics.newImage(img_path)
@@ -35,14 +36,17 @@ function Slave:draw(x, y)
     for i, trauma in ipairs(self.emotional) do
         trauma:draw(self.x+x+52*(i-1)*self.resize, self.y+y)
     end
-    if self.animator then
-        self.animator:draw(self.x+x+self.offset, self.y+y)
+    for _, animator in ipairs(self.all_animators) do
+        animator:draw(self.x+x+self.offset, self.y+y)
     end
 end
 
 function Slave:update(dt)
-    if self.animator then
-        self.animator:update(dt)
+    for _, animator in ipairs(self.all_animators) do
+        animator:update(dt)
+    end
+    for _, trauma in ipairs(self.emotional) do
+        trauma:update(dt)
     end
 end
 
@@ -72,17 +76,19 @@ function Slave:getItems()
 end
 
 function Slave:animCut(do_after)
-    self.animator = Splash.Animator(ANIMATION_POOL.cut, function ()
+    self.all_animators[#self.all_animators+1] =
+    Splash.Animator(ANIMATION_POOL.cut, function ()
         do_after()
-        self.animator = nil
+        table.remove(self.all_animators, 1)
         Battle.dudeDone()
     end)
 end
 
 function Slave:animShoot(do_after)
-    self.animator = Splash.Animator(ANIMATION_POOL.shoot, function ()
+    self.all_animators[#self.all_animators+1] =
+    Splash.Animator(ANIMATION_POOL.shoot, function ()
         do_after()
-        self.animator = nil
+        table.remove(self.all_animators, 1)
         Battle.dudeDone()
     end)
 end

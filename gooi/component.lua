@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global
 -- parent base:
 
 component = {}
@@ -462,6 +463,7 @@ function component:overItAux(x, y)
   return (hyp1 < radiusCorner or
       hyp2 < radiusCorner or
       hyp3 < radiusCorner or
+---@diagnostic disable-next-line: undefined-global
       hyp4 < radiusCorner or b), index, xm, ym
 end
 

@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global
 layout = {}
 layout.__index = layout
 layout.padding = 5

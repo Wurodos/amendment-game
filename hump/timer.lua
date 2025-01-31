@@ -124,6 +124,7 @@ local function func_tween(tween, self, len, subject, target, method, after,
 	 to_func_tween[subject] = {}
       end
 
+---@diagnostic disable-next-line: lowercase-global
       ref = {getter(subject)}
       to_func_tween[subject][k] = {ref, setter}
       if type(v) == 'number' or #ref == 1 then

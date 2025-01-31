@@ -62,6 +62,7 @@ function gooi.newButton(params)
   end
   function b:drawSpecifics(fg)
     -- Center text:
+---@diagnostic disable-next-line: redundant-parameter
     local t = self:largerLine(self.textParts)
     local x = (self.x + self.w / 2) - (gooi.getFont(self):getWidth(t) / 2)
     local y = (self.y + self.h / 2) - (gooi.getFont(self):getHeight() / 2)
