@@ -88,7 +88,7 @@ function Item:draw(slave_x, slave_y, slave_s)
 end
 
 function Item:drawInBox(x,y)
-    love.graphics.setColor(0.2,0.2,0.7,0.5)
+    love.graphics.setColor(0.2,0.2,0.7,0.8)
     love.graphics.rectangle("fill", x, y, 256*self.resize, 256*self.resize)
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(self.img, x, y, 0, self.resize)

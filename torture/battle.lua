@@ -10,6 +10,7 @@ local img_manual
 local img_order
 
 local good_team = {}
+local inventory = {}
 local bad_team = {}
 
 local rewards = {}
@@ -74,6 +75,7 @@ function Battle:init(good, bad, afterWin, param)
     
     if param.is_tutorial then is_tutorial = true
     else is_tutorial = false end
+    inventory = param._inventory or {}
     
 end
 
@@ -156,7 +158,7 @@ function Battle:draw()
 
     -- Victory screen
     if is_won then
-        love.graphics.setColor(0.7,0.7,0.7,0.5)
+        love.graphics.setColor(0.7,0.7,0.7,0.7)
         love.graphics.rectangle("fill", victory_padding, victory_padding,
             WINDOW_WIDTH - 2*victory_padding, WINDOW_HEIGHT - 2*victory_padding)
         love.graphics.setColor(1,1,1,1)
@@ -166,7 +168,8 @@ function Battle:draw()
         -- TODO Rewards
 
         for i, item in ipairs(rewards) do
-            item:drawInBox(100*i, 500)
+            item:drawInBox(100*i, 300)
+            Text.draw(i, 100*i, 300, {limit = 100})
         end
 
     end
@@ -177,7 +180,8 @@ end
 function Battle:keypressed(key)
     if is_enemy then return end
     if is_won then
-        if key == "return" then doAfterWin() end
+        if key >= '1' and key <= '9' then Battle.pickReward(key)
+        elseif key == "return" then doAfterWin() end
         return
     end
     if key == "q" then is_manual_open = not is_manual_open
@@ -190,7 +194,7 @@ function Battle:keypressed(key)
     elseif key == "o" and is_targeting then Battle.executeOrder(bad_team.boys[1])
     elseif key == "k" and is_targeting then Battle.executeOrder(bad_team.boys[2])
     elseif key == "m" and is_targeting then Battle.executeOrder(bad_team.boys[3])
-    elseif key == "space" and is_ready then Battle.confirmOrder()
+    elseif key == "space" and is_ready and not is_targeting then Battle.confirmOrder()
     end
 end
 
@@ -212,7 +216,7 @@ function Battle.chooseTarget()
     is_targeting = true
     if current_order.item.target == Item.SINGLE then
         return
-    elseif current_order.item.target == Item.TARGET.SELF then
+    elseif current_order.item.targetend == Item.TARGET.SELF then
         Battle.executeOrder(current_order.sender)
     elseif current_order.item.target == Item.TARGET.OWNTEAM then
         Battle.executeOrder(good_team)
@@ -279,7 +283,7 @@ function Battle.playerWin()
     is_won = true
 
 
-    if Battle.is_tutorial then rewards = {ITEM_POOL.Fang:clone()}
+    if is_tutorial then rewards = {ITEM_POOL.Fang:clone()}
         return
     end
 
@@ -290,6 +294,17 @@ function Battle.playerWin()
             rewards[#rewards+1] = item
         end
     end
+end
+
+function Battle.pickReward(num)
+    print("picked reward "..num)
+    num = tonumber(num)
+    if rewards[num] then
+        print(rewards[num].name)
+        inventory[#inventory+1] = rewards[num]
+        table.remove(rewards, num)
+    end
+
 end
 
 return Battle

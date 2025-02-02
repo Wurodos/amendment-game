@@ -20,6 +20,7 @@ local is_threatened = false
 local is_connection_terminated = false
 
 local expedition_force = nil
+local inventory = {}
 local ambush_force = nil
 
 local dialogue_id = 1
@@ -64,8 +65,9 @@ function Tutorial:init()
     Signal.register("battle", function ()
         is_battle = true
         is_map = false
-        Battle:init(expedition_force, ambush_force, Tutorial.proceed, {is_tutorial = true})
+        Battle:init(expedition_force, ambush_force, Tutorial.proceed, {is_tutorial = true, _inventory = inventory})
         advance_dialogue()
+        Signal.clear("battle")
     end)
 
     tw.type(text.get "TUTORIAL_1", tw_delay)
@@ -129,7 +131,7 @@ end
 
 function Tutorial.proceed()
     print("GO!")
-    Gamestate.switch(Firstrun, expedition_force)
+    Gamestate.switch(Firstrun, expedition_force, inventory)
 end
 
 

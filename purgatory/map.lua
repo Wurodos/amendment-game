@@ -4,6 +4,8 @@ local Tile = require "purgatory.tile"
 local Entity = require "util.entity"
 local Signal = require "hump.signal"
 
+local Force = require "purgatory.force"
+
 local img_party
 
 local tile_pool = {}
@@ -17,6 +19,7 @@ local camera_x = 0
 local camera_y = 0
 
 local is_movement_blocked = false
+local is_force = false
 
 function Map:init(param)
     tile_pool = {
@@ -65,13 +68,19 @@ function Map:update(dt)
 end
 
 function Map:keypressed(key)
+    if party.is_moving then return end
+
     -- For now just moves party 1 step forward
-    if key == "rshift" and not party.is_moving and not is_movement_blocked then
+    if key == "rshift" and not is_movement_blocked then
         party.is_moving = true
         party.map_pos = party.map_pos + 1
         Entity:move(party, {x=party.x+offset,y=party.y},300, function ()
+            party.is_moving = false
             Map:encounter()
         end)
+    -- party screen
+    elseif key == "lshift" then
+        is_force = not is_force
     end
 end
 
