@@ -2,6 +2,7 @@ local Gamestate = require "hump.gamestate"
 local Menu = require "boot.menu"
 local Splash = require "torture.bits.splash"
 local Saving = require "limbo.save"
+local Chaos = require "util.chaos"
 
 local math = require "math"
 require "gooi"
@@ -11,6 +12,8 @@ require "gooi"
 
 function love.load()
     local TT = require "text.text"
+
+    Chaos.init()
     math.randomseed(37)
 
     STYLE = {}

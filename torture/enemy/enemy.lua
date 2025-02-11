@@ -9,8 +9,8 @@ local Enemy = {}
 -- COMMON ENEMIES
 
 Enemy.Chomper = Class{ __includes = Slave,
-    init = function (self, weapon, hat, trinket, resize)
-        Slave.init(self, weapon, hat, trinket, resize)
+    init = function (self, ...)
+        Slave.init(self, ...)
         self.img = love.graphics.newImage("torture/enemy/chomper.png")
     end,
     drop = function (self)

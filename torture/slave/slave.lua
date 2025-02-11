@@ -71,9 +71,39 @@ function Slave:addTrauma(trauma)
     return is_duplicate
 end
 
+function Slave:equip(item)
+    local old_item = nil
+    
+    if item.type == "w" then
+        old_item = self.weapon
+        self.weapon = item
+    elseif item.type == "h" then
+        old_item = self.hat
+        self.hat = item
+    elseif item.type == "t" then
+        old_item = self.trinket
+        self.trinket = item
+    end
+
+    return old_item
+end
+
 function Slave:getItems()
     return {self.weapon,self.hat,self.trinket}
 end
+
+
+-- Dialogue System
+
+function Slave:advanceDialogue()
+    
+end
+
+function Slave:talk(allLines, do_after)
+    
+end
+
+-- Attack animations
 
 function Slave:animCut(do_after)
     self.all_animators[#self.all_animators+1] =

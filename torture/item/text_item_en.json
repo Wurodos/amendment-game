@@ -1,0 +1,33 @@
+{
+    "Fist" : {
+        "name" : "Fist",
+        "desc" : "Smash the face of the enemy!"
+    },
+    "ClearHead" : {
+        "name" : "Clear Head",
+        "desc" : ""
+    },
+    "EmptyHand" : {
+        "name" : "Empty Hand",
+        "desc" : "Free hands are the free speech! Untie your tongue and cheer up your team!"
+    },
+    "MagnetAccelerator" : {
+        "name" : "Magnet Accelerator",
+        "desc" : "Model used in Eternal Revolutions. A dangerous toy in the wrong hands"
+    },
+    "Cap" : {
+        "name" : "Cap",
+        "desc" : "[D.O.G.M.A]"
+    },
+    "Receiver" : {
+        "name" : "Receiver",
+        "desc" : "Unintelligible noise. As you go deeper into the mines, the clearer the voice inside becomes",
+        "message_1" : "25... Laplace's Angel... conscience without will... the holy bane of reptiles....",
+        "message_2" : "26........great rep-p-p-p-p-p-p-p...THE SCYTHE OF CIVILISATIONS...",
+        "message_3" : "37..........and our world will be ruled by The Dogs."
+    },
+    "Fang" : {
+        "name" : "Fang",
+        "desc" : ""
+    }
+}

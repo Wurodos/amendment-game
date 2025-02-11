@@ -15,7 +15,10 @@ local health_color = {0.36, 0.72, 0.36, 1.0}
 
 local Team = Class{
     init = function (self, boys, maxmorale, is_player_team)
-        self.boys = boys
+        self.boys = {}
+        for _, boy in ipairs(boys) do
+            self:add(boy)
+        end
         self.maxmorale = maxmorale or 100
         self.morale = self.maxmorale
         self.ratio = self.morale / self.maxmorale

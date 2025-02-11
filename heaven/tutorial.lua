@@ -60,7 +60,7 @@ function Tutorial:init()
     ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
     ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
 
-    Map:init({is_tutorial = true})
+    Map:init({is_tutorial = true, team = expedition_force, _inventory = inventory})
     Map:blockMovement()
     Signal.register("battle", function ()
         is_battle = true

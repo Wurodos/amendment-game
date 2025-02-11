@@ -15,8 +15,11 @@ local bad_team = {}
 
 local rewards = {}
 
-local team_offset_x = 150
+local team_offset_x = 0
+local team_offset_x_target = 150
 local team_offset_y = 60
+local intro_speed = 100
+
 local victory_padding = 50
 
 -- Fields: item, sender
@@ -24,6 +27,10 @@ local orders = {}
 local current_order = {}
 
 local waiting_for_dudes = 0
+
+-- flags
+
+local is_intro = false
 local is_tutorial = false
 local is_manual_open = false
 local is_ordering = false
@@ -48,6 +55,8 @@ local doAfterWin
 
 function Battle:init(good, bad, afterWin, param)
 
+    is_intro = true
+    team_offset_x = 0
     -- Signal.register("animation_over_deferred", Battle.enemyTurn)
 
     bg_image = love.graphics.newImage("torture/bg.png")
@@ -80,7 +89,24 @@ function Battle:init(good, bad, afterWin, param)
 end
 
 
+------------------------------------------------------------
+-- A small animation of both teams approaching each other---
+-- Should be easy? ----------------------------------------- 
+------------------------------------------------------------
+
+function Battle.intro()
+    
+end
+
+------------------------------------------------
+
 function Battle:update(dt)
+    if is_intro then
+        team_offset_x = team_offset_x + intro_speed*dt
+        if team_offset_x >= team_offset_x_target then
+            is_intro = false
+        end
+    end
     for _, slave in ipairs(good_team.boys) do
         slave:update(dt)
     end
@@ -97,6 +123,7 @@ function Battle:draw()
     love.graphics.draw(bg_image)
     love.graphics.setColor(1,1,1)
 
+    -- Order connections
     if is_ready then
         for _, slave in ipairs(good_team.boys) do
             local order = slave.pending_order
@@ -216,7 +243,7 @@ function Battle.chooseTarget()
     is_targeting = true
     if current_order.item.target == Item.SINGLE then
         return
-    elseif current_order.item.targetend == Item.TARGET.SELF then
+    elseif current_order.item.target == Item.TARGET.SELF then
         Battle.executeOrder(current_order.sender)
     elseif current_order.item.target == Item.TARGET.OWNTEAM then
         Battle.executeOrder(good_team)

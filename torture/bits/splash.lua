@@ -8,7 +8,9 @@ Splash.Animator = Class{
         self.current_frame = 1
         self.delta = 0
         self.spf = 1/animation.fps
-        self.doAfter = doAfter
+        self.doAfter = doAfter or function ()
+            self.current_frame = 1
+        end
         self.frames = animation.frames
     end,
     update = function (self, dt)
@@ -28,10 +30,11 @@ Splash.Animator = Class{
 
 local ellipse_width = 50
 
-local function loadFrames(name, n)
+function Splash.loadFrames(name, n, _prefix)
     local frames = {}
+    local prefix = _prefix or "torture/bits/anim_"
     for i = 1, n, 1 do
-        frames[i] = love.graphics.newImage("torture/bits/anim_"..name.."_"..i..".png")
+        frames[i] = love.graphics.newImage(prefix..name.."_"..i..".png")
     end
     return frames
 end
@@ -77,19 +80,19 @@ function Splash.init()
     is_animating = false
     ANIMATION_POOL = {
         cut = {
-            frames = loadFrames("cut", 4),
+            frames = Splash.loadFrames("cut", 4),
             fps = 5
         },
         shoot = {
-            frames = loadFrames("shoot", 4),
+            frames = Splash.loadFrames("shoot", 4),
             fps = 10
         },
         shield = {
-            frames = loadFrames("shield", 4),
+            frames = Splash.loadFrames("shield", 4),
             fps = 5
         },
         sun = {
-            frames = loadFrames("sun", 4),
+            frames = Splash.loadFrames("sun", 4),
             fps = 10
         }
     }

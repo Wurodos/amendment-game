@@ -34,6 +34,16 @@ function tt.get(text_id)
     return all_text[text_id]
 end
 
+function tt.get_batch(batch_id)
+    local batch = {}
+    for i = 1, 100, 1 do
+        if all_text[batch_id.."_"..i] then
+            batch[i] = all_text[batch_id.."_"..i]
+        else break end
+    end
+    return batch
+end
+
 function tt.draw(text, x, y, param)
     local limit = WINDOW_WIDTH
     local align = "center"

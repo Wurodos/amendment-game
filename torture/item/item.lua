@@ -84,7 +84,10 @@ end
 -- requires resizing
 function Item:draw(slave_x, slave_y, slave_s)
     local s = slave_s or 1
-    if self.img then love.graphics.draw(self.img, self.pos.x*s + slave_x , self.pos.y*s + slave_y, 0, s*self.resize) end
+    if self.img then 
+        love.graphics.draw(self.img, self.pos.x*s + slave_x , self.pos.y + slave_y, 0,
+            s*self.resize, self.resize) 
+    end
 end
 
 function Item:drawInBox(x,y)

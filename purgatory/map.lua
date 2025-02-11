@@ -7,6 +7,7 @@ local Signal = require "hump.signal"
 local Force = require "purgatory.force"
 
 local img_party
+local img_manual
 
 local tile_pool = {}
 local mask = {}
@@ -20,26 +21,35 @@ local camera_y = 0
 
 local is_movement_blocked = false
 local is_force = false
+local is_manual = false
 
 function Map:init(param)
     tile_pool = {
         tile = Tile("tile"),
+        mash = Tile("mash"),
         exit = Tile("exit")
     }
 
     img_party = love.graphics.newImage("purgatory/party.png")
+    img_manual = love.graphics.newImage("purgatory/manual_"..LANG..".png")
     party = {x=0,y=0,img=img_party, tile_no = 1}
     Entity:new(party)
 
     if param.offset then offset = param.offset end
     if param.camera_speed then camera_speed = param.camera_speed end
+    if param.team then party.team = param.team end
+    if param._inventory then party.inventory = param._inventory end
 
     if param.is_tutorial then
-        for i = 1, 3, 1 do
+        for i = 1, 2, 1 do
             mask[i] = tile_pool.tile:clone()
             mask[i].x = offset * i
             mask[i].y = offset
         end
+        mask[3] = tile_pool.mash:clone()
+        mask[3].x = offset * i
+        mask[3].y = offset
+
         mask[4] = tile_pool.exit:clone()
         mask[4].x = offset * 4
         mask[4].y = offset
@@ -79,18 +89,28 @@ function Map:keypressed(key)
             Map:encounter()
         end)
     -- party screen
-    elseif key == "lshift" then
+    elseif key == "lctrl" then
         is_force = not is_force
+        Force.init(party.team, party.inventory)
+    elseif key == "q" then
+        is_manual = not is_manual
     end
 end
 
 function Map:draw()
+
     for i, tile in ipairs(mask) do
         love.graphics.draw(tile.img, camera_x +  tile.x, camera_y + tile.y)
     end
-    
 
     Entity:draw(camera_x, camera_y)
+    if is_force then
+        Force.draw()
+    end
+
+    if is_manual then
+        love.graphics.draw(img_manual)
+    end
 end
 
 function Map:blockMovement()
@@ -107,6 +127,8 @@ function Map:encounter()
         
         -- Battle
         Signal.emit("battle")
+    elseif mask[party.map_pos].name == "mash" then
+        Signal.emit("mash")
     end
 end
 
