@@ -55,8 +55,7 @@ end
 
 function Test:draw()
 
-    -- static
-
+    
     
 
     text.setFont "big"
@@ -76,9 +75,10 @@ function Test:draw()
         love.graphics.printf(text.get "CLICK_REMINDER", 0, WINDOW_HEIGHT - 50, WINDOW_WIDTH, "center")
     end
     
+    -- static
 
     for i = 1, 10, 1 do
-        local y = static_y+Chaos.pseudo(-16,16)*i
+        local y = static_y+Chaos.pseudo(-32,32)*i
         if y > WINDOW_HEIGHT then
             y = y - WINDOW_HEIGHT
         elseif y < 0 then

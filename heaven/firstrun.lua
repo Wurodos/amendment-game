@@ -49,6 +49,7 @@ function Firstrun:enter(_, team, _inventory)
             is_masherov = false
             masherov.resize = 1
             player_team:add(masherov)
+            Map:purge()
             is_map = true
         end)
         is_masherov = true

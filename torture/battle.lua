@@ -205,14 +205,14 @@ end
 
 
 function Battle:keypressed(key)
+    if key == "q" then is_manual_open = not is_manual_open end
     if is_enemy then return end
     if is_won then
         if key >= '1' and key <= '9' then Battle.pickReward(key)
         elseif key == "return" then doAfterWin() end
         return
-    end
-    if key == "q" then is_manual_open = not is_manual_open
-    elseif key == "u" and not is_ordering then Battle.startOrder(good_team.boys[1])
+    end    
+    if key == "u" and not is_ordering then Battle.startOrder(good_team.boys[1])
     elseif key == "h" and not is_ordering then Battle.startOrder(good_team.boys[2])
     elseif key == "b" and not is_ordering then Battle.startOrder(good_team.boys[3])
     elseif key == "a" and is_ordering then Battle.switchOrder(2)
@@ -252,9 +252,11 @@ end
 
 function Battle.executeOrder(victim)
     print("execute")
-    current_order.victim = victim
-    is_targeting = false
-    is_ready = true
+    if victim then
+        current_order.victim = victim
+        is_targeting = false
+        is_ready = true
+    end
 end
 
 function Battle.confirmOrder()

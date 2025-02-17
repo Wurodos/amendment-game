@@ -8,7 +8,8 @@ local Text = require "text.text"
 local all_trauma_text = {}
 
 local Trauma = Class{
-    init = function (self, name, effects)
+    init = function (self, name, severity, effects)
+        self.universal_name = name
         self.name = all_trauma_text[name].name
         self.desc = all_trauma_text[name].desc
         self.x = 0
@@ -16,6 +17,8 @@ local Trauma = Class{
 
         self.img = love.graphics.newImage("torture/pain/img_"..name..".png")
         self.size = self.img:getWidth()
+
+        self.severity = severity
 
         self.morale_tick = effects.morale_tick or 0
         self.copies = effects.copies or 1
@@ -30,12 +33,23 @@ function Trauma.initPool()
     local raw_json = file:read "*a"
     all_trauma_text = json.decode(raw_json)
 
-
+    -- RED are dangerous and will lead to downfall in a few turns
+    -- GREEN are mildly inconvenient and usually fuck up the victim's ability to fight 
+    -- YELLOW are in the middle: can take down the team if too many of them and offer some utility
 
     TRAUMA_POOL = {
-        swisscheese = Trauma("swisscheese", {morale_tick = 20}),
-        bitten = Trauma("bitten", {morale_tick = 5}),
-        salt = Trauma("salt", {morale_tick = 5, copies = 3}) 
+        -- a lot of bullets
+        swisscheese = Trauma("swisscheese", 'r', {morale_tick = 20}),
+        -- bite
+        bitten = Trauma("bitten", 'y', {morale_tick = 7}),
+        -- same trauma
+        salt = Trauma("salt", 'y', {morale_tick = 5, copies = 3}),
+        -- TODO change TRINKET order to 'Clean the Spores' that will remove it
+        spore = Trauma("spore", 'g', {override_trinket = function (slave)
+            slave:removeTrauma("spore")
+        end}),
+        -- a little morale drop w/ stacking enabled
+        pain = Trauma("pain", 'g', {morale_tick = 2, copies = 3}),
     }
 end
 

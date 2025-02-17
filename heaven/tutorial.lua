@@ -56,6 +56,9 @@ function Tutorial:init()
     expedition_force:add(Slave(ITEM_POOL.MagnetAccelerator:clone()))
     expedition_force:add(Slave(ITEM_POOL.MagnetAccelerator:clone()))
 
+    inventory[#inventory+1] = ITEM_POOL.Draniki:clone()
+    inventory[#inventory+1] = ITEM_POOL.Draniki:clone()
+
     ambush_force = Team({}, 100)
     ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
     ambush_force:add(Enemy.Chomper(nil, nil, nil, -1))
@@ -91,10 +94,12 @@ function Tutorial:keypressed(key)
             Battle:keypressed(key)
         elseif dialogue_id > 11 then
             if dialogue_id == 12 and (key == "u" or key == "h") then advance_dialogue()
-            elseif dialogue_id == 13 then 
+            elseif dialogue_id == 13 then
                 if key == "s" then advance_dialogue()
                 elseif key == "a" or key == "d" then advance_dialogue("FORCE_ACCELERATOR") return end
-            elseif dialogue_id == 14 and (key == "space") then advance_dialogue()
+            elseif dialogue_id == 14 then
+                if  key == "space" then advance_dialogue()
+                elseif key == "u" or key == "h" then advance_dialogue("MORE_ORDERS") return end
             elseif dialogue_id > 14 and dialogue_id < 21 then return 
             elseif dialogue_id == 21 and (key == "u" or key == "h") then is_threatened = true advance_dialogue()
             elseif threat_id > 1 and threat_id < 4 then return end
@@ -131,6 +136,7 @@ end
 
 function Tutorial.proceed()
     print("GO!")
+    Map:purge()
     Gamestate.switch(Firstrun, expedition_force, inventory)
 end
 

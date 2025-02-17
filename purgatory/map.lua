@@ -26,6 +26,7 @@ local is_manual = false
 function Map:init(param)
     tile_pool = {
         tile = Tile("tile"),
+        purged = Tile("purged"),
         mash = Tile("mash"),
         exit = Tile("exit")
     }
@@ -41,11 +42,14 @@ function Map:init(param)
     if param._inventory then party.inventory = param._inventory end
 
     if param.is_tutorial then
-        for i = 1, 2, 1 do
-            mask[i] = tile_pool.tile:clone()
-            mask[i].x = offset * i
-            mask[i].y = offset
-        end
+        mask[1] = tile_pool.purged:clone()
+            mask[1].x = offset * 1
+            mask[1].y = offset
+        
+            mask[2] = tile_pool.tile:clone()
+            mask[2].x = offset * 2
+            mask[2].y = offset
+        
         mask[3] = tile_pool.mash:clone()
         mask[3].x = offset * i
         mask[3].y = offset
@@ -62,6 +66,13 @@ function Map:init(param)
     party.is_moving = false
 end
 
+function Map:purge()
+    local purged_tile = tile_pool.purged:clone()
+    purged_tile.x = mask[party.map_pos].x
+    purged_tile.y = mask[party.map_pos].y
+    mask[party.map_pos] = purged_tile
+end
+
 function Map:returnToMap()
 end
 
@@ -75,6 +86,11 @@ function Map:update(dt)
     if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
         camera_x = camera_x - dt*camera_speed end
     Entity:update(dt)
+    if is_force then
+        for _, slave in ipairs(party.team.boys) do
+            slave:update(dt)
+        end
+    end
 end
 
 function Map:keypressed(key)
@@ -95,11 +111,13 @@ function Map:keypressed(key)
     elseif key == "q" then
         is_manual = not is_manual
     end
+
+    if is_force then Force.keypressed(key) end
 end
 
 function Map:draw()
 
-    for i, tile in ipairs(mask) do
+    for _, tile in ipairs(mask) do
         love.graphics.draw(tile.img, camera_x +  tile.x, camera_y + tile.y)
     end
 
@@ -129,7 +147,24 @@ function Map:encounter()
         Signal.emit("battle")
     elseif mask[party.map_pos].name == "mash" then
         Signal.emit("mash")
+    elseif mask[party.map_pos].name == "exit" then
+        Map.generateFloor()
     end
 end
+
+
+
+
+-- Basic algorithm
+--
+--
+--
+
+local floor = {}
+
+function Map.generateFloor()
+    
+end
+
 
 return Map
