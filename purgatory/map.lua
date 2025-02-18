@@ -10,9 +10,10 @@ local img_party
 local img_manual
 
 local tile_pool = {}
-local mask = {}
+local floor = {}
+local floorSize = 11
 
-local party = {}
+local party = {map_pos = {x = 1, y = 1}}
 
 local offset = 128
 local camera_speed = 200
@@ -23,7 +24,14 @@ local is_movement_blocked = false
 local is_force = false
 local is_manual = false
 
+local function addTileTo(i, j, tile)
+    floor[i][j] = tile
+    tile.x = offset * j
+    tile.y = offset * i
+end
+
 function Map:init(param)
+    party = {}
     tile_pool = {
         tile = Tile("tile"),
         purged = Tile("purged"),
@@ -33,7 +41,7 @@ function Map:init(param)
 
     img_party = love.graphics.newImage("purgatory/party.png")
     img_manual = love.graphics.newImage("purgatory/manual_"..LANG..".png")
-    party = {x=0,y=0,img=img_party, tile_no = 1}
+    party = {x=0,y=0,img=img_party, map_pos = {x = 1, y = 1}}
     Entity:new(party)
 
     if param.offset then offset = param.offset end
@@ -41,36 +49,39 @@ function Map:init(param)
     if param.team then party.team = param.team end
     if param._inventory then party.inventory = param._inventory end
 
+    
     if param.is_tutorial then
-        mask[1] = tile_pool.purged:clone()
-            mask[1].x = offset * 1
-            mask[1].y = offset
+        floor[1] = {}
+        floor[1][1] = tile_pool.purged:clone()
+            floor[1][1].x = offset * 1
+            floor[1][1].y = offset
         
-            mask[2] = tile_pool.tile:clone()
-            mask[2].x = offset * 2
-            mask[2].y = offset
+            floor[1][2] = tile_pool.tile:clone()
+            floor[1][2].x = offset * 2
+            floor[1][2].y = offset
         
-        mask[3] = tile_pool.mash:clone()
-        mask[3].x = offset * i
-        mask[3].y = offset
+            floor[1][3] = tile_pool.mash:clone()
+            floor[1][3].x = offset * i
+            floor[1][3].y = offset
 
-        mask[4] = tile_pool.exit:clone()
-        mask[4].x = offset * 4
-        mask[4].y = offset
+            floor[1][4] = tile_pool.exit:clone()
+            floor[1][4].x = offset * 4
+            floor[1][4].y = offset
     end
 
 
-    party.x = mask[party.tile_no].x
-    party.y = mask[party.tile_no].y
-    party.map_pos = 1
+    party.x = floor[1][1].x
+    party.y = floor[1][1].y
+    party.map_pos.x = 1
+    party.map_pos.y = 1
     party.is_moving = false
 end
 
 function Map:purge()
     local purged_tile = tile_pool.purged:clone()
-    purged_tile.x = mask[party.map_pos].x
-    purged_tile.y = mask[party.map_pos].y
-    mask[party.map_pos] = purged_tile
+    purged_tile.x = floor[party.map_pos.y][party.map_pos.x].x
+    purged_tile.y = floor[party.map_pos.y][party.map_pos.x].y
+    floor[party.map_pos.y][party.map_pos.x] = purged_tile
 end
 
 function Map:returnToMap()
@@ -99,7 +110,7 @@ function Map:keypressed(key)
     -- For now just moves party 1 step forward
     if key == "rshift" and not is_movement_blocked then
         party.is_moving = true
-        party.map_pos = party.map_pos + 1
+        party.map_pos.x = party.map_pos.x + 1
         Entity:move(party, {x=party.x+offset,y=party.y},300, function ()
             party.is_moving = false
             Map:encounter()
@@ -117,8 +128,12 @@ end
 
 function Map:draw()
 
-    for _, tile in ipairs(mask) do
-        love.graphics.draw(tile.img, camera_x +  tile.x, camera_y + tile.y)
+    for i = 1, floorSize, 1 do
+        for j = 1, floorSize, 1 do
+            if floor[i] and floor[i][j] then
+                love.graphics.draw(floor[i][j].img, camera_x +  floor[i][j].x, camera_y + floor[i][j].y)
+            end
+        end
     end
 
     Entity:draw(camera_x, camera_y)
@@ -140,14 +155,14 @@ function Map:unblockMovement()
 end
 
 function Map:encounter()
-    if mask[party.map_pos].name == "tile" then
-        print("encounter tile")
-        
+    local current_tile = floor[party.map_pos.y][party.map_pos.x]
+    if current_tile.name == "tile" then
+        print("encounter tile") 
         -- Battle
         Signal.emit("battle")
-    elseif mask[party.map_pos].name == "mash" then
+    elseif floor[party.map_pos.y][party.map_pos.x].name == "mash" then
         Signal.emit("mash")
-    elseif mask[party.map_pos].name == "exit" then
+    elseif floor[party.map_pos.y][party.map_pos.x].name == "exit" then
         Map.generateFloor()
     end
 end
@@ -155,16 +170,64 @@ end
 
 
 
--- Basic algorithm
---
---
---
 
-local floor = {}
+
+
+
+--------------------------------------------------------------------------------------------------
+----------------------------------------- MAP GENERATION -----------------------------------------
+--------------------------------------------------------------------------------------------------
+
+-- Basic algorithm
+-- Start from center (size/2, size/2)
+-- Create a pool of adjacents
+-- Pick orthoganal direction
+-- Generate random (size / 4 to size / 2) tiles in that dir
+-- At each tile, there's 15% (-1% each time it happens) chance for branch, in which case pick perpendicular and add to queue
+-- Repeat those 2 steps until all 4 orthoganal are resolved (w/ branches)
+
+
+
+
+local branch_chance = 15
+
+local function go(i, j, i_dt, j_dt, tilesLeft)
+    -- out of bounds check
+    if i > floorSize or j > floorSize or i == 0 or j == 0 then return end
+    if tilesLeft == 0 then return end
+
+    -- add tile
+    if floor[i][j] == nil then
+        addTileTo(i, j, tile_pool.tile:clone())
+    end
+    -- branch?
+
+    -- keep going in direction
+    go(i+i_dt, j+j_dt, i_dt, j_dt, tilesLeft - 1)
+end
 
 function Map.generateFloor()
-    
+    floor = {}
+    branch_chance = 15
+
+    for i = 1, floorSize, 1 do floor[i] = {} end
+    local center = math.floor(floorSize / 2) + 1
+
+    addTileTo(center, center, tile_pool.purged:clone())
+
+    go(center + 1, center, 1, 0, math.random(center / 2, center))
+    go(center - 1, center, -1, 0,math.random(center / 2, center))
+    go(center, center + 1, 0, 1, math.random(center / 2, center))
+    go(center, center - 1, 0, -1, math.random(center / 2, center))
+
+    party.map_pos.x, party.map_pos.y = center, center
 end
+
+
+
+--------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 
 
 return Map
