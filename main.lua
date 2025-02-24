@@ -14,7 +14,7 @@ function love.load()
     local TT = require "text.text"
 
     Chaos.init()
-    math.randomseed(37)
+    math.randomseed(100)
 
     STYLE = {}
     

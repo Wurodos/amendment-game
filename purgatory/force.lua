@@ -73,8 +73,9 @@ function Force.keypressed(key)
             if item_ptr < 1 then item_ptr = #inventory end
         end
         if is_slave_ptr then
-            slave_ptr = slave_ptr - 1
-            if slave_ptr < 1 then slave_ptr = #team.boys end
+            slave_ptr = slave_ptr + 1
+            if slave_ptr > #team.boys then slave_ptr = 1 end
+            
         end
     elseif key == "," then
         if is_item_ptr and item_ptr > 0 then
@@ -82,8 +83,8 @@ function Force.keypressed(key)
             if item_ptr > #inventory then item_ptr = 1 end
         end
         if is_slave_ptr then
-            slave_ptr = slave_ptr + 1
-            if slave_ptr > #team.boys then slave_ptr = 1 end
+            slave_ptr = slave_ptr - 1
+            if slave_ptr < 1 then slave_ptr = #team.boys end
         end
     elseif key == "tab" and item_ptr > 0 then
         local leftover = team.boys[slave_ptr]:equip(inventory[item_ptr])

@@ -3,6 +3,7 @@ local Map = {}
 local Tile = require "purgatory.tile"
 local Entity = require "util.entity"
 local Signal = require "hump.signal"
+local Chaos = require "util.chaos"
 
 local Force = require "purgatory.force"
 
@@ -11,12 +12,12 @@ local img_manual
 
 local tile_pool = {}
 local floor = {}
-local floorSize = 11
+local floorSize = 17
 
 local party = {map_pos = {x = 1, y = 1}}
 
 local offset = 128
-local camera_speed = 200
+local camera_speed = 400
 local camera_x = 0
 local camera_y = 0
 
@@ -36,7 +37,11 @@ function Map:init(param)
         tile = Tile("tile"),
         purged = Tile("purged"),
         mash = Tile("mash"),
-        exit = Tile("exit")
+        exit = Tile("exit"),
+        redstar = Tile("chervonozorz"),
+        govnov = Tile("govnov"),
+        city = Tile("city"),
+        reptile = Tile("37")
     }
 
     img_party = love.graphics.newImage("purgatory/party.png")
@@ -53,28 +58,28 @@ function Map:init(param)
     if param.is_tutorial then
         floor[1] = {}
         floor[1][1] = tile_pool.purged:clone()
-            floor[1][1].x = offset * 1
-            floor[1][1].y = offset
-        
-            floor[1][2] = tile_pool.tile:clone()
-            floor[1][2].x = offset * 2
-            floor[1][2].y = offset
-        
-            floor[1][3] = tile_pool.mash:clone()
-            floor[1][3].x = offset * i
-            floor[1][3].y = offset
-
-            floor[1][4] = tile_pool.exit:clone()
-            floor[1][4].x = offset * 4
-            floor[1][4].y = offset
+        floor[1][1].x = offset * 1
+        floor[1][1].y = offset
+    
+        floor[1][2] = tile_pool.tile:clone()
+        floor[1][2].x = offset * 2
+        floor[1][2].y = offset
+    
+        floor[1][3] = tile_pool.mash:clone()
+        floor[1][3].x = offset * i
+        floor[1][3].y = offset
+        floor[1][4] = tile_pool.exit:clone()
+        floor[1][4].x = offset * 4
+        floor[1][4].y = offset
+        party.x = floor[1][1].x
+        party.y = floor[1][1].y
+        party.map_pos.x = 1
+        party.map_pos.y = 1
+        party.is_moving = false
     end
 
 
-    party.x = floor[1][1].x
-    party.y = floor[1][1].y
-    party.map_pos.x = 1
-    party.map_pos.y = 1
-    party.is_moving = false
+    
 end
 
 function Map:purge()
@@ -128,8 +133,8 @@ end
 
 function Map:draw()
 
-    for i = 1, floorSize, 1 do
-        for j = 1, floorSize, 1 do
+    for i = 1, floorSize+1, 1 do
+        for j = 1, floorSize+1, 1 do
             if floor[i] and floor[i][j] then
                 love.graphics.draw(floor[i][j].img, camera_x +  floor[i][j].x, camera_y + floor[i][j].y)
             end
@@ -189,38 +194,87 @@ end
 
 
 
-local branch_chance = 15
+local branch_chance = 20
+local current_branch_chance = branch_chance
 
-local function go(i, j, i_dt, j_dt, tilesLeft)
+local function go(i, j, i_dt, j_dt, tilesLeft, exit_dir)
     -- out of bounds check
-    if i > floorSize or j > floorSize or i == 0 or j == 0 then return end
-    if tilesLeft == 0 then return end
+    if i > floorSize or j > floorSize or i == 0 or j == 0 then
+        if exit_dir == 0 then 
+            addTileTo(i-i_dt, j-j_dt, tile_pool.reptile:clone()) 
+            addTileTo(i, j, tile_pool.exit:clone()) 
+        end
+        return
+    end
+    if tilesLeft == 0 then
+        print(exit_dir)
+        if exit_dir == 0 then 
+            addTileTo(i-i_dt, j-j_dt, tile_pool.reptile:clone()) 
+            addTileTo(i, j, tile_pool.exit:clone()) 
+        end
+        return
+    end
 
     -- add tile
     if floor[i][j] == nil then
         addTileTo(i, j, tile_pool.tile:clone())
-    end
+    else return end
+
     -- branch?
+    
+    if math.random(0, 99) < current_branch_chance then
+        print("Branch created on "..i.." "..j)
+        -- pick perpendicular direction
+
+        local br_i, br_j
+
+        if i_dt == 0 then br_j = 0   br_i = Chaos.pickRandom({-1, 1})
+        elseif j_dt == 0 then br_i = 0   br_j = Chaos.pickRandom({-1, 1}) end
+
+        -- decide length
+
+        tilesLeft = math.random(3, 6)
+
+        --
+        branch_chance = branch_chance - 1
+
+        go(i+br_i, j+br_j, br_i, br_j, tilesLeft, 1)
+
+    end
 
     -- keep going in direction
-    go(i+i_dt, j+j_dt, i_dt, j_dt, tilesLeft - 1)
+    go(i+i_dt, j+j_dt, i_dt, j_dt, tilesLeft - 1, exit_dir)
 end
 
 function Map.generateFloor()
     floor = {}
-    branch_chance = 15
+    
+    local exit_dir = math.random(1, 4)
 
-    for i = 1, floorSize, 1 do floor[i] = {} end
+    for i = 1, floorSize+1, 1 do floor[i] = {} end
     local center = math.floor(floorSize / 2) + 1
 
     addTileTo(center, center, tile_pool.purged:clone())
 
-    go(center + 1, center, 1, 0, math.random(center / 2, center))
-    go(center - 1, center, -1, 0,math.random(center / 2, center))
-    go(center, center + 1, 0, 1, math.random(center / 2, center))
-    go(center, center - 1, 0, -1, math.random(center / 2, center))
+    current_branch_chance = branch_chance
+    exit_dir = exit_dir - 1
+    go(center + 1, center, 1, 0, math.random(center / 2, center), exit_dir)
+
+    current_branch_chance = branch_chance
+    exit_dir = exit_dir - 1
+    go(center - 1, center, -1, 0,math.random(center / 2, center), exit_dir)
+
+    current_branch_chance = branch_chance
+    exit_dir = exit_dir - 1
+    go(center, center + 1, 0, 1, math.random(center / 2, center), exit_dir)
+
+    current_branch_chance = branch_chance
+    exit_dir = exit_dir - 1
+    go(center, center - 1, 0, -1, math.random(center / 2, center), exit_dir)
 
     party.map_pos.x, party.map_pos.y = center, center
+    party.x, party.y = floor[center][center].x, floor[center][center].y
+    camera_x, camera_y = -party.x, -party.y
 end
 
 

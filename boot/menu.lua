@@ -8,11 +8,11 @@ local text = require "text.text"
 
 
 -- testing
-local Splash = require "torture.bits.splash"
-local Timer = require "hump.timer"
-local Signal = require "hump.signal"
-local anim_frames = {}
-local cur_frame = 0
+--local Splash = require "torture.bits.splash"
+--local Timer = require "hump.timer"
+--local Signal = require "hump.signal"
+--local anim_frames = {}
+--local cur_frame = 0
 
 local Menu = {}
 

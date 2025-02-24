@@ -1,5 +1,9 @@
 local Test = {}
 
+-- map gen test
+local Map = require "purgatory.map"
+local map_debug = false
+
 
 local Gamestate = require "hump.gamestate"
 local Tutorial = require "heaven.tutorial"
@@ -24,9 +28,16 @@ function Test:init()
     dialogue_id = 1
     love.window.setTitle("HEAVEN")
     tw.type(text.get "GREETING", 0.07)
+
+    if map_debug then
+        Map:init({})
+        Map.generateFloor()
+    end
+
 end
 
 function Test:update(dt)
+    if map_debug then Map:update(dt) end
     tw.update(dt)
     static_y = static_y + 100*dt
     if static_y > WINDOW_HEIGHT then
@@ -55,6 +66,7 @@ end
 
 function Test:draw()
 
+    if map_debug then Map:draw() end
     
     
 
